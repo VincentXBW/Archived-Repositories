@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vincent's Portfolio</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #fff;
+    }
+    header {
+      text-align: center;
+      padding: 3rem 1rem;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+    header h1 {
+      font-size: 3rem;
+      margin: 0;
+    }
+    header p {
+      font-size: 1.2rem;
+      margin-top: 0.5rem;
+    }
+    .projects {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      padding: 2rem;
+    }
+    .card {
+      background: linear-gradient(135deg, #ff9966, #ff5e62);
+      padding: 1.5rem;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:nth-child(2n) {
+      background: linear-gradient(135deg, #36d1dc, #5b86e5);
+    }
+    .card:nth-child(3n) {
+      background: linear-gradient(135deg, #ff758c, #ff7eb3);
+    }
+    .card:nth-child(4n) {
+      background: linear-gradient(135deg, #43e97b, #38f9d7);
+    }
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.5);
+    }
+    .card h2 {
+      margin-top: 0;
+      font-size: 1.5rem;
+    }
+    .card p {
+      font-size: 1rem;
+      margin: 0.5rem 0 1rem;
+    }
+    .card a {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      border-radius: 25px;
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      text-decoration: none;
+      transition: background 0.3s ease;
+    }
+    .card a:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+    footer {
+      text-align: center;
+      padding: 2rem;
+      background: linear-gradient(135deg, #764ba2, #667eea);
+      margin-top: 2rem;
+    }
+    footer p {
+      margin: 0;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="https://github.com/VincentXBW"><h1>Vincent's Portfolio</h1></a>
+    <p>Exploring coding, retro computing, Linux, and innovation</p>
+  </header>
+
+  <section class="projects">
+    <div class="card">
+      <h2>Skin Cancer Awareness Website</h2>
+      <p>Designed to educate about skin cancer prevention and awareness.</p>
+      <a href="https://VincentXBW.github.io/SkinCancerAwareness/">View Project</a>
+    </div>
+    <div class="card">
+      <h2>Lumberjack Idle Game</h2>
+      <p>A fun resource management idle game featuring woodcutting and mining.</p>
+      <a href="https://VincentXBW.github.io/Lumberjack-Idle/">View Project</a>
+    </div>
+    <div class="card">
+      <h2>Batch MultiTool</h2>
+      <p>A powerful batch script toolkit packed with 25+ tools and utilities.</p>
+      <a href="https://VincentXBW.github.io/MultiTool/">View Project</a>
+    </div>
+    <div class="card">
+      <h2>Custom Terminal</h2>
+      <p>A Linux-inspired custom terminal with 50+ commands, plugin support, and themes.</p>
+      <a href="https://VincentXBW.github.io/Custom-Terminal/">View Project</a>
+    </div>
+    <div class="card">
+      <h2>Arch Linux Setup</h2>
+      <p>Documented my full Arch Linux + Hyprland install and customization process.</p>
+      <a href="https://VincentXBW.github.io/Arch-Linux-Setup/">View Project</a>
+    </div>
+    <div class="card">
+      <h2>Ecosystem Bloom</h2>
+      <p>Created a nature scavenger hunt and flora photography app for everyone, this is a wirefreame and not an actuall app.</p>
+      <a href="https://VincentXBW.github.io/EcosystemBloom/">View Project</a>
+    </div>
+    <div class="card">
+      <h2>Ethical Hacking Practice</h2>
+      <p>Learning cybersecurity through DVWA, Burp Suite, and ethical hacking exercises.</p>
+      <a href="https://VincentXBW.github.io/Ethical-Hacking/">View Project</a>
+    </div>
+    <div class="card">
+      <h2>Retro Computing</h2>
+      <p>Exploring old hardware, software, and vintage computing culture.</p>
+      <a href="https://VincentXBW.github.io/Retro-Computing/">View Project</a>
+    </div>
+  </section>
+  <footer>
+    <p>© 2025 Vincent — Built with HTML, CSS & ❤️</p>
+    <script type="text/javascript" src="https://counter.websiteout.com/js/7/4/0/0"></script>
+  </footer>
+</body>
+</html>

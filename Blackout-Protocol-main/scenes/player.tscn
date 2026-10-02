@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://bf8pb1md7vuym"]
+
+[ext_resource type="Script" uid="uid://bcvfdydlfbqn6" path="res://scripts/player.gd" id="1_3vyb7"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_cvnsp"]
+height = 2.578125
+
+[node name="Player" type="CharacterBody3D" unique_id=1803734233]
+script = ExtResource("1_3vyb7")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2112801911]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2265625, 0)
+shape = SubResource("CapsuleShape3D_cvnsp")
+
+[node name="TwistPivot" type="Node3D" parent="." unique_id=1695274467]
+
+[node name="PitchPivot" type="Node3D" parent="TwistPivot" unique_id=1579342453]
+
+[node name="FPCamera" type="Camera3D" parent="TwistPivot/PitchPivot" unique_id=625218122]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5984626, 0)
+
+[node name="TPSpringArm" type="SpringArm3D" parent="." unique_id=1889711952]
+spring_length = 3.0
+
+[node name="TPCamera" type="Camera3D" parent="TPSpringArm" unique_id=64653541]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)

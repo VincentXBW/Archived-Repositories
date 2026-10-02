@@ -1,0 +1,151 @@
+/* Global Reset & Font */
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: 'Arial', sans-serif;
+  background: linear-gradient(to bottom, #f0fdfa, #e0f7f1);
+  color: #1e293b;
+  height: 100%;
+  width: 100%;
+}
+
+/* App container fills full screen */
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+/* Pages */
+.page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 80px; /* space for navbar */
+}
+
+/* Headings */
+h2 {
+  text-align: center;
+  color: #065f46;
+  margin: 0;
+}
+
+/* Inputs */
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 6px 0;
+  border-radius: 14px;
+  border: 1px solid #cbd5e1;
+  box-sizing: border-box;
+  font-size: 16px;
+}
+
+/* Buttons */
+button {
+  background-color: #10b981;
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 10px 16px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover {
+  background-color: #059669;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Scan cards */
+.scan-card {
+  background: white;
+  border-radius: 16px;
+  padding: 12px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* Garden grid */
+.garden-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.garden-plant {
+  background: #f0fdf4;
+  border-radius: 16px;
+  padding: 10px;
+  text-align: center;
+  font-size: 14px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* Info text inside garden */
+.garden-plant .info {
+  font-size: 12px;
+  color: #475569;
+  margin-top: 4px;
+}
+
+/* Scan results */
+.scan-results {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Navbar at bottom for mobile */
+.navbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  background: #fef3c7;
+  padding: 10px 0;
+  border-top: 1px solid #cbd5e1;
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 -2px 6px rgba(0,0,0,0.1);
+}
+
+.navbar button {
+  flex: 1;
+  margin: 0 6px;
+  border-radius: 12px;
+  font-size: 14px;
+  padding: 8px 0;
+}
+
+.navbar button.active {
+  background: #34d399;
+  color: white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  input, button {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .garden-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+
+  .garden-plant {
+    font-size: 12px;
+    padding: 8px;
+  }
+}

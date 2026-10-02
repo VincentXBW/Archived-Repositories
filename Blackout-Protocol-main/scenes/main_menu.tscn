@@ -1,0 +1,112 @@
+[gd_scene format=3 uid="uid://b1ex1txhhylj2"]
+
+[ext_resource type="Script" uid="uid://dlr62dvbyobpt" path="res://scripts/main_menu.gd" id="1_l6cm7"]
+[ext_resource type="Texture2D" uid="uid://bpjdbln4udnm0" path="res://media/Blackout-Protocol.png" id="2_ekxnf"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vue75"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_l6cm7"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ekxnf"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bqqt6"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wu84c"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+
+[node name="Control" type="Control" unique_id=1025833246]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_l6cm7")
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=173848087]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 224.0
+offset_bottom = 120.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_ekxnf")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1925667965]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 25.0
+offset_top = 500.0
+offset_right = -1039.0
+offset_bottom = -44.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=1176005216]
+layout_mode = 2
+alignment = 2
+
+[node name="new_game" type="Button" parent="MarginContainer/VBoxContainer" unique_id=689386782]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.012974775, 0.5004281, 0.15105739, 1)
+theme_override_colors/font_pressed_color = Color(0.021768816, 0.6917854, 0.22124201, 1)
+theme_override_colors/font_hover_color = Color(0.023529412, 0.7411765, 0.23921569, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_vue75")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_l6cm7")
+theme_override_styles/hover = SubResource("StyleBoxFlat_ekxnf")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_bqqt6")
+theme_override_styles/focus = SubResource("StyleBoxFlat_wu84c")
+text = "New Game"
+alignment = 0
+
+[node name="load_game" type="Button" parent="MarginContainer/VBoxContainer" unique_id=1361652369]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.012974775, 0.5004281, 0.15105739, 1)
+theme_override_colors/font_pressed_color = Color(0.021768816, 0.6917854, 0.22124201, 1)
+theme_override_colors/font_hover_color = Color(0.023529412, 0.7411765, 0.23921569, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_vue75")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_l6cm7")
+theme_override_styles/hover = SubResource("StyleBoxFlat_ekxnf")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_bqqt6")
+theme_override_styles/focus = SubResource("StyleBoxFlat_wu84c")
+text = "Load Game"
+alignment = 0
+
+[node name="options" type="Button" parent="MarginContainer/VBoxContainer" unique_id=780030252]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.012974775, 0.5004281, 0.15105739, 1)
+theme_override_colors/font_pressed_color = Color(0.021768816, 0.6917854, 0.22124201, 1)
+theme_override_colors/font_hover_color = Color(0.023529412, 0.7411765, 0.23921569, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_vue75")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_l6cm7")
+theme_override_styles/hover = SubResource("StyleBoxFlat_ekxnf")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_bqqt6")
+theme_override_styles/focus = SubResource("StyleBoxFlat_wu84c")
+text = "Options"
+alignment = 0
+
+[node name="quit" type="Button" parent="MarginContainer/VBoxContainer" unique_id=1407196068]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.012974775, 0.5004281, 0.15105739, 1)
+theme_override_colors/font_pressed_color = Color(0.021768816, 0.6917854, 0.22124201, 1)
+theme_override_colors/font_hover_color = Color(0.023529412, 0.7411765, 0.23921569, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_vue75")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_l6cm7")
+theme_override_styles/hover = SubResource("StyleBoxFlat_ekxnf")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_bqqt6")
+theme_override_styles/focus = SubResource("StyleBoxFlat_wu84c")
+text = "Quit"
+alignment = 0
+
+[connection signal="pressed" from="MarginContainer/VBoxContainer/new_game" to="." method="_on_new_game_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/load_game" to="." method="_on_load_game_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/options" to="." method="_on_options_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/quit" to="." method="_on_quit_pressed"]

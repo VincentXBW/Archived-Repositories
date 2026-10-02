@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://ly7apxl0oqbg"]
+
+[ext_resource type="PackedScene" uid="uid://bf8pb1md7vuym" path="res://scenes/player.tscn" id="2_wwpf4"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_njcek"]
+albedo_color = Color(0.023529412, 0.7411765, 0.23921569, 1)
+
+[node name="Level1" type="Node3D" unique_id=1320853540]
+
+[node name="CSGBox3D" type="CSGBox3D" parent="." unique_id=1505359650]
+use_collision = true
+size = Vector3(15, 0.5, 15)
+material = SubResource("StandardMaterial3D_njcek")
+
+[node name="Player" parent="." unique_id=1803734233 instance=ExtResource("2_wwpf4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.70202684, 0.68171847, 0.25112343)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=730366321]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=658647672]

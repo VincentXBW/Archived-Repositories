@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Tutor Workspace</title>
+    <style>
+        /* --- CSS Reset & Variables --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --sidebar-width: 260px;
+            --text-main: #ffffff;
+            --text-muted: #a0aec0;
+            --accent-color: #3b82f6; 
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            color: var(--text-main);
+            background: radial-gradient(circle at 20% 30%, #161920 0%, #0b0c10 100%);
+        }
+
+        /* --- Zen Browser Inspired Sidebar --- */
+        aside {
+            width: var(--sidebar-width);
+            background: rgba(10, 11, 15, 0.8);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 30px 20px;
+            z-index: 10;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .logo-box {
+            font-size: 1.5rem;
+        }
+
+        .brand h1 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        nav {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 0.95rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            width: 100%;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+        }
+
+        .nav-btn.active {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--accent-color);
+            font-weight: 600;
+            border-left: 3px solid var(--accent-color);
+        }
+
+        .sidebar-footer {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.3);
+            margin-top: 15px;
+        }
+
+        /* --- Content Frame --- */
+        main {
+            flex-grow: 1;
+            position: relative;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        /* --- Page Switch Architecture --- */
+        .page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 40px;
+            overflow-y: auto;
+            
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(15px);
+            transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+            
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .page.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        /* --- UI Component Styling --- */
+        h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+            color: #fff;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 12px;
+            color: var(--accent-color);
+        }
+
+        .card p {
+            color: #cbd5e1;
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .grid-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .contact-pill {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 5px 0;
+            font-family: monospace;
+            font-size: 1.1rem;
+            color: #60a5fa;
+        }
+        
+        /* --- Expanded Resume Notepad Styling --- */
+        .notepad-container {
+            width: 100%;
+            border: 1px solid #707070;
+            box-shadow: 4px 4px 15px rgba(0, 0, 0, 0.4);
+            margin-top: 10px;
+        }
+
+        .notepad-textarea {
+            width: 100%;
+            height: 550px; /* Made larger for text workspace clarity */
+            padding: 20px;
+            box-sizing: border-box;
+            border: none;
+            resize: vertical;
+            outline: none;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 15px;
+            line-height: 1.6;
+            background-color: #ffffff;
+            color: #000000;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        /* --- AI Interface Components --- */
+        .ai-chatbox {
+            display: flex;
+            flex-direction: column;
+            height: 380px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .ai-messages {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .msg {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .msg.bot {
+            background: rgba(255, 255, 255, 0.08);
+            color: #f1f5f9;
+            align-self: flex-start;
+        }
+
+        .msg.user {
+            background: var(--accent-color);
+            color: white;
+            align-self: flex-end;
+        }
+
+        .ai-input-area {
+            display: flex;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid var(--border-color);
+            gap: 10px;
+        }
+
+        .ai-input-area input {
+            flex-grow: 1;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .ai-send-btn {
+            background: var(--accent-color);
+            border: none;
+            color: white;
+            padding: 0 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* --- Certifications & Pathways Layout --- */
+        .cert-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .cert-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            transition: transform 0.2s;
+        }
+
+        .cert-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+
+        .badge-tag {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .pathway-step {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .step-num {
+            background: var(--accent-color);
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        /* --- Embedded YouTube Video Grid --- */
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .video-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        .video-info {
+            padding: 15px;
+            flex-grow: 1;
+        }
+
+        /* --- Account Management Styling --- */
+        .profile-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 30px;
+        }
+
+        .avatar-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 15px;
+        }
+
+        .big-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+        }
+
+        .hobby-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .hobby-checkbox {
+            display: none;
+        }
+
+        .hobby-label {
+            padding: 8px 14px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            user-select: none;
+            transition: all 0.2s;
+        }
+
+        .hobby-checkbox:checked + .hobby-label {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: var(--accent-color);
+            color: #60a5fa;
+        }
+
+        .bio-area {
+            width: 100%;
+            height: 120px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            color: white;
+            font-size: 1rem;
+            resize: none;
+            outline: none;
+            margin-top: 10px;
+        }
+
+        .bio-area:focus {
+            border-color: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+
+    <aside>
+        <div>
+            <div class="brand">
+                <div class="logo-box">🎓</div>
+                <h1>Job tutor</h1>
+            </div>
+            
+            <nav>
+                <button class="nav-btn active" onclick="showPage('home')">Home</button>
+                <button class="nav-btn" onclick="showPage('account')">Account Profile</button>
+                <button class="nav-btn" onclick="showPage('ai')">AI Assistant</button>
+                <button class="nav-btn" onclick="showPage('discover')">Discover & Certs</button>
+                <button class="nav-btn" onclick="showPage('videos')">Video Tutorials</button>
+                <button class="nav-btn" onclick="showPage('resume')">Resume Workspace</button>
+                <button class="nav-btn" onclick="showPage('tools')">Tools</button>
+                <button class="nav-btn" onclick="showPage('about')">About Us</button>
+                <button class="nav-btn" onclick="showPage('help')">Help</button>
+            </nav>
+        </div>
+
+        <div class="sidebar-footer">
+            © 2026 CK Inc.
+        </div>
+    </aside>
+
+    <main>
+
+        <div id="home" class="page active">
+            <h2>Home Dashboard</h2>
+            <div class="card">
+                <h3>Welcome back!</h3>
+                <p>This is the primary workspace interface for Job Tutor. Select an option from the sidebar utility panel on the left side of your viewport grid to access modules, update milestones, or monitor roadmap pathways.</p>
+                <br>
+                <p>Job Tutor is a dedicated, not-for-profit organization committed to empowering individuals by breaking down the often intimidating barriers of the modern job market. With a strong core focus on employment education, the organization provides job seekers with the practical tools, personalized pathways, and step-by-step career roadmaps needed to confidently navigate their professional journeys. By focusing on fundamental skills and structured guidance, the organization ensures that everyone—regardless of their starting point—has access to the foundational knowledge required to understand the value of employment and achieve financial independence.</p>
+            </div>
+        </div>
+
+        <div id="account" class="page">
+            <h2>Account Management</h2>
+            <div class="card">
+                <div class="profile-container">
+                    <div class="avatar-section">
+                        <div class="big-avatar">👤</div>
+                        <div>
+                            <h3>Samantha Jones</h3>
+                            <p style="font-size: 0.9rem;">Student Profile</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h3>Personal Identification Details</h3>
+                        <p style="font-size:0.95rem; color:var(--text-muted)">Configure your custom profile metadata variables to help tailor your pathways map:</p>
+                        
+                        <label style="display:block; margin-top:15px; font-weight:600;">Tell us about yourself (Bio):</label>
+                        <textarea class="bio-area" placeholder="Write a short summary about your professional goals or experience...">Year 11 student looking to build strong baseline competencies in technology, security, and digital data management channels.</textarea>
+                        
+                        <label style="display:block; margin-top:20px; font-weight:600;">Select Areas of Interest & Hobbies:</label>
+                        <div class="hobby-selector">
+                            <input type="checkbox" id="h1" class="hobby-checkbox" checked><label for="h1" class="hobby-label">Cybersecurity</label>
+                            <input type="checkbox" id="h2" class="hobby-checkbox"><label for="h2" class="hobby-label">Web Development</label>
+                            <input type="checkbox" id="h3" class="hobby-checkbox" checked><label for="h3" class="hobby-label">Gaming</label>
+                            <input type="checkbox" id="h4" class="hobby-checkbox"><label for="h4" class="hobby-label">Graphic Design</label>
+                            <input type="checkbox" id="h5" class="hobby-checkbox" checked><label for="h5" class="hobby-label">Customer Support</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="ai" class="page">
+            <h2>AI Assistant Terminal</h2>
+            <div class="card">
+                <h3>Interactive Job Tutor AI</h3>
+                <p style="margin-bottom: 15px;">Ask questions regarding certifications, career layout tracks, or get real-time assistance drafting items.</p>
+                
+                <div class="ai-chatbox">
+                    <div class="ai-messages" id="chatMessages">
+                        <div class="msg bot">Hello! I am your Job Tutor AI Assistant. Ask me anything about creating pathways, selecting certificates, or preparing for interviews.</div>
+                        <div class="msg user">How do I start a career trajectory in Cybersecurity?</div>
+                        <div class="msg bot">A great pathway is starting with foundational training! Look at getting certificates like the CompTIA Security+ or Google Cybersecurity Certificate. Check the "Discover & Certs" panel for active links.</div>
+                    </div>
+                    <div class="ai-input-area">
+                        <input type="text" id="chatInput" placeholder="Ask a professional support question...">
+                        <button class="ai-send-btn" onclick="triggerAiSendMessage()">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="discover" class="page">
+            <h2>Discover Pathways & Certifications</h2>
+            
+            <div class="card">
+                <h3>Cybersecurity Certification Track Matrix</h3>
+                <p style="margin-bottom: 20px;">Industry recognized foundational framework certs to quickly build market authority and clear HR screening gates:</p>
+                <div class="cert-grid">
+                    <div class="cert-card">
+                        <span class="badge-tag">Beginner</span>
+                        <h4 style="color:#60a5fa; margin-bottom:8px;">Google Cybersecurity Certificate</h4>
+                        <p style="font-size:0.9rem;">Provides entry-level, hands-on training using fundamental tools like Python, Linux, and SQL databases alongside Security Information and Event Management (SIEM) consoles.</p>
+                    </div>
+                    <div class="cert-card">
+                        <span class="badge-tag">Core Industry</span>
+                        <h4 style="color:#60a5fa; margin-bottom:8px;">CompTIA Security+</h4>
+                        <p style="font-size:0.9rem;">A globally trusted benchmark engineering verification certificate that cross-examines essential troubleshooting skills and risk-assessment matrices.</p>
+                    </div>
+                    <div class="cert-card">
+                        <span class="badge-tag">Networking</span>
+                        <h4 style="color:#60a5fa; margin-bottom:8px;">Cisco Certified Support Technician (CCST)</h4>
+                        <p style="font-size:0.9rem;">Validates robust fundamental grasp over data routes, device security tracking configurations, system management protocols, and packet transfers.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Step-by-Step Employment Pathway Roadmap</h3>
+                <p style="margin-bottom: 20px; color: var(--text-muted);">Follow this structured roadmap pipeline to progress smoothly from raw learning directly into commercial opportunities:</p>
+                <div>
+                    <div class="pathway-step">
+                        <div class="step-num">1</div>
+                        <div>
+                            <h4>Identify Core Technical Interests</h4>
+                            <p style="font-size:0.95rem;">Isolate specific job categories (like Network Defence, Frontend Coding, or IT administration support operations) using your Account interest tags profile options.</p>
+                        </div>
+                    </div>
+                    <div class="pathway-step">
+                        <div class="step-num">2</div>
+                        <div>
+                            <h4>Build a Standard Monospace Clean Resume</h4>
+                            <p style="font-size:0.95rem;">Utilize the integrated markdown workspace layout editor box below to structure high-impact, chronological summaries to optimize ATS screening filters.</p>
+                        </div>
+                    </div>
+                    <div class="pathway-step">
+                        <div class="step-num">3</div>
+                        <div>
+                            <h4>Acquire Gateway Certifications</h4>
+                            <p style="font-size:0.95rem;">Complete specialized introductory certificate courses to demonstrate active continuous upskilling directly to recruiters.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="videos" class="page">
+            <h2>Video Learning Repository</h2>
+            <p style="color: var(--text-muted); margin-bottom: 5px;">Curated instructional videos to teach you resume development fundamentals and tech path entry strategies:</p>
+            <div class="video-grid">
+                
+                <div class="video-card">
+                    <div class="video-wrapper">
+                        <iframe src="https://www.youtube.com/embed/uG67g886j8U" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                    <div class="video-info">
+                        <h4 style="color: #60a5fa; margin-bottom: 5px;">The Perfect Resume Architecture</h4>
+                        <p style="font-size:0.9rem; color:#cbd5e1;">A deep-dive analysis outlining formatting mistakes to avoid when drafting application history.</p>
+                    </div>
+                </div>
+
+                <div class="video-card">
+                    <div class="video-wrapper">
+                        <iframe src="https://www.youtube.com/embed/3bGR6G6Eor4" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                    <div class="video-info">
+                        <h4 style="color: #60a5fa; margin-bottom: 5px;">Cybersecurity Career Pathways</h4>
+                        <p style="font-size:0.9rem; color:#cbd5e1;">An introductory mapping guide explaining the differences between entry-level blue and red-team job descriptions.</p>
+                    </div>
+                </div>
+
+                <div class="video-card">
+                    <div class="video-wrapper">
+                        <iframe src="https://www.youtube.com/embed/jZ_y-w9pP_w" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                    <div class="video-info">
+                        <h4 style="color: #60a5fa; margin-bottom: 5px;">How to Ace Tech Interviews</h4>
+                        <p style="font-size:0.9rem; color:#cbd5e1;">Practical communication habits and technical whiteboard tips to help you build confidence in front of a hiring panel.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="resume" class="page">
+            <h2>Resume Workspace</h2>
+            <div class="grid-box">
+                <div class="card">
+                    <h3>Step 3 of 12 — Milestones</h3>
+                    <p style="color: #4ade80; font-weight: bold; margin-bottom: 10px;">✔ Progress Saved</p>
+                    <p>Now list your previous jobs, internships, or volunteer roles in reverse chronological order. Focus on your achievements and responsibilities, using strong action verbs to show how you made a difference.</p>
+                </div>
+                <div class="card">
+                    <h3>Document Draft Meta & System Data</h3>
+                    <p>Our built-in Notepad Resume Editor automatically strips out messy formatting from copied text, ensuring your document stays clean and 100% compatible with modern employer systems.</p>
+                </div>
+            </div>
+            
+            <div class="notepad-container">
+                <textarea class="notepad-textarea" placeholder="Type or paste your resume here...">======================================================================
+SAMANTHA JONES
+0412 345 678 | sam.jones@email.com | Shepparton, VIC
+======================================================================
+
+PROFESSIONAL SUMMARY
+Enthusiastic and reliable student with strong communication skills and a rapidly expanding foundation in tech support environments. Proven ability to work well in fast-paced team dynamics through volunteer roles and school leadership milestones.
+
+WORK EXPERIENCE
+Casual Retail Assistant | Local Charity Op Shop, Shepparton
+October 2025 – Present
+* Welcomed customers warmly and assisted them in finding items.
+* Operated terminal sales modules efficiently while executing daily register accounting balances.
+
+Volunteer Team Leader | Shepparton Community Youth Festival
+March 2026
+* Directed setup and tear-down pipelines for technology event stands.</textarea>
+            </div>
+        </div>
+
+        <div id="tools" class="page">
+            <h2>Tools</h2>
+            <div class="card">
+                <h3>External Resource Links</h3>
+                <p style="margin-bottom: 15px;">Access linked portal systems and database tools directly:</p>
+                <p style="margin-bottom: 15px; color: var(--text-muted);">Access linked portal systems and database tools directly:</p>
+
+<a href="https://jobseeker.com" target="_blank" style="color: #60a5fa; font-weight: bold; text-decoration: none; font-size: 1.1rem; display: block; margin: 10px 0;">jobseeker.com ↗</a>
+
+<a href="https://au.seek.com/jobs/in-Shepparton-VIC-3630" target="_blank" style="color: #60a5fa; font-weight: bold; text-decoration: none; font-size: 1.1rem; display: block; margin: 10px 0;">Seek.com ↗</a>
+
+<a href="https://au.indeed.com/jobs?q=&l=Shepparton+VIC&radius=50&from=searchOnDesktopSerp&vjk=91a5421e2ae3ea70" target="_blank" style="color: #60a5fa; font-weight: bold; text-decoration: none; font-size: 1.1rem; display: block; margin: 10px 0;">indeed.com ↗</a>
+
+<a href="https://www.vic.gov.au/free-tafe" target="_blank" style="color: #60a5fa; font-weight: bold; text-decoration: none; font-size: 1.1rem; display: block; margin: 10px 0;">vic.gov.au/free-tafe ↗</a>
+
+<a href="https://www.youthcentral.vic.gov.au" target="_blank" style="color: #60a5fa; font-weight: bold; text-decoration: none; font-size: 1.1rem; display: block; margin: 10px 0;">youthcentral.vic.gov.au ↗</a>
+
+<a href="https://jobs.vic.gov.au" target="_blank" style="color: #60a5fa; font-weight: bold; text-decoration: none; font-size: 1.1rem; display: block; margin: 10px 0;">jobs.vic.gov.au ↗</a>
+
+<a href="https://www.skills.vic.gov.au" target="_blank" style="color: #60a5fa; font-weight: bold; text-decoration: none; font-size: 1.1rem; display: block; margin: 10px 0;">skills.vic.gov.au ↗</a>
+
+<a href="https://headspace.org.au" target="_blank" style="color: #60a5fa; font-weight: bold; text-decoration: none; font-size: 1.1rem; display: block; margin: 10px 0;">headspace.org.au ↗</a>
+
+<a href="https://www.cvgt.com.au" target="_blank" style="color: #60a5fa; font-weight: bold; text-decoration: none; font-size: 1.1rem; display: block; margin: 10px 0;">cvgt.com.au ↗</a>
+                <a href="https://www.hackthebox.com" target="_blank" style="color: #60a5fa; font-weight: bold; text-decoration: none; font-size: 1.1rem; display: block; margin: 10px 0;">Hack The Box (Cybersecurity Training) ↗</a>
+
+<a href="https://tryhackme.com" target="_blank" style="color: #60a5fa; font-weight: bold; text-decoration: none; font-size: 1.1rem; display: block; margin: 10px 0;">TryHackMe (Hands-on Cyber Labs) ↗</a>
+
+<a href="https://www.coursera.org" target="_blank" style="color: #60a5fa; font-weight: bold; text-decoration: none; font-size: 1.1rem; display: block; margin: 10px 0;">Coursera (Professional Certificates) ↗</a>
+
+<a href="https://skillsforall.com" target="_blank" style="color: #60a5fa; font-weight: bold; text-decoration: none; font-size: 1.1rem; display: block; margin: 10px 0;">Cisco Skills For All (Free Tech Courses) ↗</a>
+
+<a href="https://www.linkedin.com" target="_blank" style="color: #60a5fa; font-weight: bold; text-decoration: none; font-size: 1.1rem; display: block; margin: 10px 0;">LinkedIn (Professional Networking) ↗</a>
+
+<a href="https://www.cyberseek.org" target="_blank" style="color: #60a5fa; font-weight: bold; text-decoration: none; font-size: 1.1rem; display: block; margin: 10px 0;">CyberSeek (Cybersecurity Career Pathways) ↗</a>
+                <a href="https://github.com" target="_blank" style="color: #60a5fa; font-weight: bold; text-decoration: none; font-size: 1.1rem; display: block; margin: 10px 0;">GitHub (Code Hosting & Portfolio) ↗</a>
+
+<a href="https://code.visualstudio.com" target="_blank" style="color: #60a5fa; font-weight: bold; text-decoration: none; font-size: 1.1rem; display: block; margin: 10px 0;">Visual Studio Code (Code Editor) ↗</a>
+
+<a href="https://www.canva.com" target="_blank" style="color: #60a5fa; font-weight: bold; text-decoration: none; font-size: 1.1rem; display: block; margin: 10px 0;">Canva (Graphic Design & Presentations) ↗</a>
+
+<a href="https://www.google.com/drive" target="_blank" style="color: #60a5fa; font-weight: bold; text-decoration: none; font-size: 1.1rem; display: block; margin: 10px 0;">Google Drive (Cloud Storage & Workspace) ↗</a>
+
+<a href="https://trello.com" target="_blank" style="color: #60a5fa; font-weight: bold; text-decoration: none; font-size: 1.1rem; display: block; margin: 10px 0;">Trello (Project Management & Task Board) ↗</a>
+
+<a href="https://www.typingclub.com" target="_blank" style="color: #60a5fa; font-weight: bold; text-decoration: none; font-size: 1.1rem; display: block; margin: 10px 0;">TypingClub (Touch Typing Practice) ↗</a>
+            </div>
+        </div>
+
+        <div id="about" class="page">
+            <h2>About Our Organization</h2>
+            <div class="grid-box">
+                <div class="card">
+                    <h3>Mission Profile</h3>
+                    <p>We operate as a structured, not-for-profit educational group providing tools, systemic guidance lines, and action plans to demystify employment options.</p>
+                    <p style="margin-top: 15px; font-weight: bold; color: #93c5fd;">Project Developers:</p>
+                    <p style="font-size: 1rem; margin-bottom: 10px;">• Vincent Whitehead<br>• Damon Carrin<br>• Tom Ash</p>
+                    
+                    <p style="font-weight: bold; color: #93c5fd;">Source Code Repository:</p>
+                    <a href="https://github.com/VincentXBW" target="_blank" style="color: #60a5fa; text-decoration: none; font-family: monospace;">github.com/VincentXBW ↗</a>
+                </div>
+                <div class="card">
+                    <h3>Acknowledgment of Country</h3>
+                    <p>We acknowledge the Traditional Custodians of the lands we live on. We pay our respects to all Elders, past and present, of all Aboriginal and Torres Strait Islander nations.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="help" class="page">
+            <h2>Help & Documentation</h2>
+            <div class="card">
+                <h3>Contact Hotlines</h3>
+                <p>Connect to organisations that can help you if in need:</p>
+                <div class="contact-pill" style="display: block; margin-bottom: 10px; width: fit-content;">132 490 • Youth and Students low-income hotline</div>
+
+<div class="contact-pill" style="display: block; margin-bottom: 10px; width: fit-content;">13 11 14 • Lifeline</div>
+
+<div class="contact-pill" style="display: block; margin-bottom: 10px; width: fit-content;">1800 55 1800 • Kids Helpline</div>
+
+<div class="contact-pill" style="display: block; margin-bottom: 10px; width: fit-content;">131 823 • Victorian Skills Gateway</div>
+
+<div class="contact-pill" style="display: block; margin-bottom: 10px; width: fit-content;">1800 650 890 • Headspace</div>
+
+<div class="contact-pill" style="display: block; margin-bottom: 10px; width: fit-content;">132 848 • CVT Youth Employment Services</div>
+            </div>
+            <h4>For more help regarding website visit github.com/VincentXBW/Job-Tutor</h4>
+        </div>
+
+    </main>
+
+    <script>
+        function showPage(pageId) {
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(p => p.classList.remove('active'));
+
+            const buttons = document.querySelectorAll('.nav-btn');
+            buttons.forEach(b => b.classList.remove('active'));
+
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+            }
+
+            const sourceButton = Array.from(buttons).find(b => 
+                b.getAttribute('onclick').includes(`'${pageId}'`)
+            );
+            if (sourceButton) {
+                sourceButton.classList.add('active');
+            }
+        }
+
+        function triggerAiSendMessage() {
+            const input = document.getElementById('chatInput');
+            const messagesContainer = document.getElementById('chatMessages');
+            
+            if (input.value.trim() !== "") {
+                const userMsg = document.createElement('div');
+                userMsg.className = 'msg user';
+                userMsg.textContent = input.value;
+                messagesContainer.appendChild(userMsg);
+                
+                const userText = input.value.toLowerCase();
+                input.value = "";
+                
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                
+                setTimeout(() => {
+                    const botMsg = document.createElement('div');
+                    botMsg.className = 'msg bot';
+                    
+                    if(userText.includes('cert') || userText.includes('cyber')) {
+                        botMsg.textContent = "To fast-track cybersecurity credentials, head over to the 'Discover & Certs' tab. I've laid out information on Google Cyber and CompTIA Security+ options directly!";
+                    } else if(userText.includes('resume')) {
+                        botMsg.textContent = "Make sure your resume uses reverse-chronological order. Your resume workspace textarea is now expanded to 550px tall to give you plenty of drafting space.";
+                    } else {
+                        botMsg.textContent = "That sounds critical! Let's explore customized solutions together. Try defining your goals or setting interest tags inside the Account panel.";
+                    }
+                    
+                    messagesContainer.appendChild(botMsg);
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }, 750);
+            }
+        }
+
+        document.getElementById('chatInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                triggerAiSendMessage();
+            }
+        });
+    </script>
+</body>
+</html>

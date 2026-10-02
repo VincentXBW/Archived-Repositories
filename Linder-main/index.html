@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linder©</title>
+
+<style>
+:root {
+    --primary-pink: #ff5a5f;
+    --bg-light: #f5f7fa;
+    --text-dark: #333333;
+    --text-muted: #777777;
+    --border-color: #e8e8e8;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #d0d0d0;
+    color: var(--text-dark);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Simulated Application Frame */
+.app-window {
+    display: flex;
+    width: 1000px;
+    height: 600px;
+    background: white;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    overflow: hidden;
+    position: relative;
+}
+
+/* COLUMN 1: Far Left Pink Nav Menu */
+.nav-sidebar {
+    width: 160px;
+    background: var(--primary-pink);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding-top: 15px;
+}
+
+.profile-trigger {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    gap: 10px;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+.profile-trigger img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid white;
+    object-fit: cover;
+}
+
+.profile-trigger .user-meta h4 {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.profile-trigger .user-meta p {
+    font-size: 11px;
+    opacity: 0.8;
+}
+
+.nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    gap: 12px;
+    transition: background 0.2s;
+    color: rgba(255,255,255,0.9);
+}
+
+.nav-item:hover, .nav-item.active {
+    background: rgba(0, 0, 0, 0.1);
+    color: white;
+}
+
+/* COLUMN 2: Middle List Panel */
+.list-sidebar {
+    width: 260px;
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    background: white;
+}
+
+.list-header {
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 15px;
+    font-weight: bold;
+    color: #555;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.search-icon {
+    cursor: pointer;
+    font-size: 14px;
+    color: #999;
+}
+
+.matches-scroll {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.removed-notice {
+    padding: 15px 20px;
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--border-color);
+    background: #fafafa;
+}
+
+.match-row {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    position: relative;
+}
+
+.match-row:hover, .match-row.active {
+    background: #f7f9fa;
+}
+
+.match-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    margin-right: 12px;
+}
+
+.match-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.match-info h4 {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.match-info p {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.status-dot {
+    position: absolute;
+    right: 20px;
+    width: 8px;
+    height: 8px;
+    background-color: var(--primary-pink);
+    border-radius: 50%;
+}
+
+/* COLUMN 3: Right Side Display Viewport */
+.display-canvas {
+    flex: 1;
+    background: var(--bg-light);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Card Deck Stack Layout */
+.deck-container {
+    position: relative;
+    width: 320px;
+    height: 420px;
+    margin-bottom: 20px;
+}
+
+.match-card {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Background card showing behind */
+.match-card.under {
+    transform: scale(0.95) translateY(-10px) rotate(-5deg);
+    z-index: 1;
+}
+
+.match-card.top {
+    z-index: 2;
+    transition: transform 0.4s ease;
+}
+
+.card-image-area {
+    flex: 1;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    background-color: #ddd;
+}
+
+.swipe-badge {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    border: 3px solid #2ecc71;
+    color: #2ecc71;
+    text-transform: uppercase;
+    font-weight: 800;
+    font-size: 20px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    transform: rotate(-10deg);
+    display: none;
+}
+
+.card-details {
+    padding: 15px;
+    background: white;
+    border-top: 1px solid var(--border-color);
+}
+
+.card-details h3 {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.card-details p {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    line-height: 1.3;
+}
+
+/* Circle Control Action Row */
+.action-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    z-index: 10;
+}
+
+.btn-circle {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: none;
+    background: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    transition: transform 0.1s;
+}
+
+.btn-circle:active { transform: scale(0.95); }
+.btn-circle.rewind { color: #f1c40f; font-size: 16px; }
+.btn-circle.dislike { color: #e74c3c; font-size: 20px; }
+.btn-circle.like { color: #2ecc71; font-size: 20px; }
+.btn-circle.star { color: #3498db; font-size: 16px; }
+
+/* Subview Workspace Modals */
+.content-panel {
+    display: none;
+    width: 100%;
+    height: 100%;
+    padding: 40px;
+    overflow-y: auto;
+    background: white;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 30;
+}
+
+.content-panel.active { display: block; }
+
+/* Chat Window Layout Override */
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+.chat-messages {
+    flex: 1;
+    background: #f4f6f8;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.chat-input-row {
+    padding: 15px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 10px;
+}
+.chat-input-row input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    outline: none;
+}
+.chat-input-row button {
+    background: var(--primary-pink);
+    color: white;
+    border: none;
+    padding: 0 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.msg { max-width: 65%; padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.4; }
+.msg.sent { background: #0084ff; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+.msg.received { background: #e4e6eb; color: black; align-self: flex-start; border-bottom-left-radius: 4px; }
+
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; }
+.form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; }
+</style>
+</head>
+<body>
+
+<div class="app-window">
+    
+    <div class="nav-sidebar">
+        <div class="profile-trigger" onclick="navigateTo('myProfile')">
+            <div class="user-meta">
+                <h4 id="navName">Eva</h4>
+                <p>see your profile</p>
+            </div>
+        </div>
+        <div class="nav-links">
+            <div class="nav-item active" id="nav-home" onclick="navigateTo('home')"><span>🏠</span> Home</div>
+            <div class="nav-item" id="nav-about" onclick="navigateTo('about')"><span>ℹ</span> About</div>
+        </div>
+    </div>
+
+    <div class="list-sidebar">
+        <div class="list-header">
+            <span>All Matches</span>
+            <span class="search-icon">🔍</span>
+        </div>
+        <div class="matches-scroll">
+            <div class="removed-notice">
+                <span>👤</span>
+                <span>one person has removed you</span>
+            </div>
+            <div id="matchesContainer">
+                </div>
+        </div>
+    </div>
+
+    <div class="display-canvas">
+        
+        <div class="deck-container" id="deckContainer">
+            <div class="match-card under" id="underCard">
+                <div class="card-image-area" id="underCardImg"></div>
+                <div class="card-details">
+                    <h3 id="underCardNameTitle">Leo, 14</h3>
+                    <p id="underCardSubTitle">Bio details...</p>
+                </div>
+            </div>
+            
+            <div class="match-card top" id="swipeCard">
+                <div class="card-image-area" id="cardImg">
+                    <div class="swipe-badge" id="likedBadge">LIKED</div>
+                </div>
+                <div class="card-details">
+                    <h3 id="cardNameTitle">Leo, 14</h3>
+                    <p id="cardSubTitle">Bio details...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-controls">
+            <button class="btn-circle rewind" onclick="rewindSwipe()">↺</button>
+            <button class="btn-circle dislike" onclick="executeSwipeAction(false)">✕</button>
+            <button class="btn-circle like" onclick="executeSwipeAction(true)">♥</button>
+            <button class="btn-circle star" onclick="executeSwipeAction(true)">★</button>
+        </div>
+
+        <div class="content-panel" id="panel-search">
+            <h2>Search Customization Settings</h2><br>
+            <div class="form-group">
+                <label>Distance Limit Radius</label>
+                <input type="range" min="5" max="100" value="15" oninput="this.nextElementSibling.innerText = this.value + ' km'">
+                <span>15 km</span>
+            </div>
+        </div>
+
+        <div class="content-panel" id="panel-passed">
+            <h2>Last Passed Accounts</h2><br>
+            <p style="color: var(--text-muted)">No passed accounts logged in this browsing session.</p>
+        </div>
+
+        <div class="content-panel" id="panel-settings">
+            <h2>Account Framework Settings</h2><br>
+            <div class="form-group">
+                <label><input type="checkbox" checked> Receive Desktop Discovery Notifications</label>
+            </div>
+        </div>
+
+        <div class="content-panel" id="panel-about">
+            <h2>About Linder© Desktop Pro</h2><br>
+            <p>Linder is a dating profile match service for children, based around Leo Li, This website is proudly vibe-coded by Vincent.</p>
+            <a href="https://vincentxbw.github.io/Portfolio/">https://vincentxbw.github.io/Portfolio</a>
+        </div>
+
+        <div class="content-panel" id="panel-myProfile">
+            <h2>Customize My Profile</h2><br>
+            <div class="form-group">
+                <label>User Handle</label>
+                <input type="text" id="profileInputName" value="Eva" oninput="syncUserProfileText()">
+            </div>
+            <div class="form-group">
+                <label>About Me Bio Details</label>
+                <textarea rows="3">I Love Leo Li, He Is Soooooo Hot, Dont Message Me Unless Your Leo</textarea>
+            </div>
+        </div>
+
+        <div class="content-panel" id="panel-chat">
+            <div class="chat-container">
+                <h2 id="chatPartnerHeader">Chat</h2>
+                <div class="chat-messages" id="chatBoxContainer"></div>
+                <div class="chat-input-row">
+                    <input type="text" id="chatInputField" placeholder="Say something..." onkeypress="handleChatEnter(event)">
+                    <button onclick="dispatchChatMessage()">Send</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+// Original profiles kept and assigned as the only viewable queue items
+const discoveryPool = [
+    { id: 1, name: "Leo, 14, Near You!", sub: "Bike enthusiast who loves mountain trails. Born in China.", image: "Media.jpg" },
+    { id: 2, name: "Leo, 14, 15km Away", sub: "Professional Coder and Granny Remake Remake Dev, Shepparton 15km Away", image: "Media2.jpg" },
+    { id: 3, name: "Leo, 14, Free on Tuesdays", sub: "Professional Scooter Rider, Lives In Shepparton. Born in China.", image: "Media3.jpg" }
+];
+
+// Active profiles log initialized with original records
+const matchedLog = [
+    { id: 1, name: "Leo", text: "Hey! Lets get icecream and play some tung tung tung sahur horror", image: "Media.jpg", messages: [] },
+];
+
+let cardIdx = 0;
+let conversationTargetId = null;
+
+// Over 50 answers split by category context
+const textBank = {
+    sahur: [
+        "Tung Tung Tung Sahur!!! Get up right now!",
+        "Tung Tung Tung Sahur! Wake up or you'll miss the food!",
+        "Tung Tung Tung! The alarm is ringing, it's sahur time!",
+        "Tung Tung Tung Sahur! Time to eat before the sun comes up!",
+        "Tung Tung Tung Sahur! Let's get up, don't sleep through it!"
+    ],
+    granny: [
+        "I see you... do you want to play hide and seek?",
+        "Granny is downstairs, don't drop anything on the floor!",
+        "You have 5 days left to escape this remake!",
+        "I heard a sound! Granny is coming to find you!",
+        "The teddy bear is missing... did you take it?",
+        "I'm updating the Granny Remake right now, wait for the patch notes!",
+        "Don't let the cellar doors trap you!",
+        "Granny is listening, she hears absolutely everything!"
+    ],
+    general: [
+        "That's crazy! Tell me more.",
+        "Mohaiiiiiiiiiiiit",
+        'did you add me in roblox, my username is nginxiawd',
+        "Honestly, I totally agree with that.",
+        "Wow, I didn't see that coming at all.",
+        "That reminds me of something that happened last week.",
+        "No way, are you serious right now?",
+        "Haha that is so true!",
+        "Mohaiiiiiiiiiiiit",
+        'did you add me in roblox, my username is nginxiawd',
+        "Mohaiiiiiiiiiiiit",
+        'did you add me in roblox, my username is nginxiawd',
+        "Mohaiiiiiiiiiiiit",
+        'did you add me in roblox, my username is nginxiawd',
+        "I see you... do you want to play hide and seek?",
+        "Granny is downstairs, don't drop anything on the floor!",
+        "You have 5 days left to escape this remake!",
+        "Tung Tung Tung Sahur!!! Get up right now!",
+        "Tung Tung Tung Sahur! Wake up or you'll miss the food!",
+        "Tung Tung Tung! The alarm is ringing, it's sahur time!",
+        "Tung Tung Tung Sahur! Time to eat before the sun comes up!",
+        "Tung Tung Tung Sahur! Let's get up, don't sleep through it!",
+        "I heard a sound! Granny is coming to find you!",
+        "The teddy bear is missing... did you take it?",
+        "I'm updating the Granny Remake right now, wait for the patch notes!",
+        "Don't let the cellar doors trap you!",
+        "Granny is listening, she hears absolutely everything!",
+        "Let me think about that for a second.",
+        "That makes complete sense to me.",
+        "I was literally just thinking about the exact same thing!",
+        "Can you explain that a bit more?",
+        "That sounds like an absolute win.",
+        "Oh wow, I had no idea about that.",
+        "Sounds like a plan to me!",
+        "That's pretty cool, not going to lie.",
+        "I guess we'll just have to see what happens next.",
+        "That depends on how you look at it.",
+        "I'm not completely sure, but it sounds interesting!",
+        "Haha, fair enough!",
+        "That sounds like a whole lot of fun.",
+        "We should definitely check that out sometime.",
+        "Interesting point of view, I like it.",
+        "Let's see how that goes!",
+        "That sounds perfect.",
+        "You always come up with the wildest things!",
+        "That is definitely a unique way to look at it.",
+        "I guess you are totally right about that.",
+        "Let's make it happen!",
+        "That sounds like an adventure waiting to happen.",
+        "I'm completely down for that.",
+        "Can't argue with that logic!",
+        "Haha, stop it! You're joking right?",
+        "That's standard procedure around here.",
+        "We might have to figure that out later.",
+        "Sounds good, keep me posted on that!",
+        "That's exactly how it works.",
+        "You always find the best ways to describe things.",
+        "That's a tough one, but I see your point."
+    ]
+};
+
+function renderDiscoveryCard() {
+    if (discoveryPool.length === 0) return;
+    const activeItem = discoveryPool[cardIdx];
+    document.getElementById("cardNameTitle").textContent = activeItem.name;
+    document.getElementById("cardSubTitle").textContent = activeItem.sub;
+    document.getElementById("cardImg").style.backgroundImage = `url('${activeItem.image}')`;
+    
+    // Background preview profile updates
+    const upcomingIdx = (cardIdx + 1) % discoveryPool.length;
+    const nextItem = discoveryPool[upcomingIdx];
+    document.getElementById("underCardNameTitle").textContent = nextItem.name;
+    document.getElementById("underCardSubTitle").textContent = nextItem.sub;
+    document.getElementById("underCardImg").style.backgroundImage = `url('${nextItem.image}')`;
+}
+
+function renderSidebarList() {
+    const listBlock = document.getElementById("matchesContainer");
+    listBlock.innerHTML = "";
+    
+    matchedLog.forEach(item => {
+        const row = document.createElement("div");
+        row.className = `match-row ${item.id === conversationTargetId ? 'active' : ''}`;
+        row.onclick = () => activateChatPanel(item.id);
+        
+        const lastMessageText = item.messages.length > 0 ? item.messages[item.messages.length - 1].text : item.text;
+        
+        row.innerHTML = `
+            <div class="match-avatar" style="background-image: url('${item.image}')"></div>
+            <div class="match-info">
+                <h4>${item.name}</h4>
+                <p>${lastMessageText}</p>
+            </div>
+            ${item.messages.length === 0 ? '<div class="status-dot"></div>' : ''}
+        `;
+        listBlock.appendChild(row);
+    });
+}
+
+function navigateTo(target) {
+    document.querySelectorAll(".nav-item").forEach(el => el.classList.remove("active"));
+    const selectedNavItem = document.getElementById(`nav-${target}`);
+    if (selectedNavItem) selectedNavItem.classList.add("active");
+
+    document.querySelectorAll(".content-panel").forEach(panel => panel.classList.remove("active"));
+    
+    if (target !== 'home' && target !== 'chat') {
+        const targetPanel = document.getElementById(`panel-${target}`);
+        if (targetPanel) targetPanel.classList.add("active");
+    } else if (target === 'chat') {
+        document.getElementById("panel-chat").classList.add("active");
+    }
+}
+
+function executeSwipeAction(isLiked) {
+    const topCard = document.getElementById("swipeCard");
+    const badge = document.getElementById("likedBadge");
+    
+    if (isLiked) {
+        badge.style.display = "block";
+        topCard.style.transform = "translate(300px, -50px) rotate(15deg)";
+    } else {
+        badge.style.display = "none";
+        topCard.style.transform = "translate(-300px, -50px) rotate(-15deg)";
+    }
+
+    setTimeout(() => {
+        topCard.style.transition = "none";
+        topCard.style.transform = "none";
+        badge.style.display = "none";
+        
+        cardIdx = (cardIdx + 1) % discoveryPool.length;
+        renderDiscoveryCard();
+        
+        setTimeout(() => {
+            topCard.style.transition = "transform 0.4s ease";
+        }, 50);
+    }, 400);
+}
+
+function rewindSwipe() {
+    cardIdx = (cardIdx - 1 + discoveryPool.length) % discoveryPool.length;
+    renderDiscoveryCard();
+}
+
+function activateChatPanel(id) {
+    conversationTargetId = id;
+    renderSidebarList();
+    navigateTo('chat');
+    
+    const partner = matchedLog.find(p => p.id === id);
+    document.getElementById("chatPartnerHeader").textContent = `Chat with ${partner.name}`;
+    refreshChatThread();
+}
+
+function refreshChatThread() {
+    const msgBox = document.getElementById("chatBoxContainer");
+    msgBox.innerHTML = "";
+    
+    const partner = matchedLog.find(p => p.id === conversationTargetId);
+    if (!partner) return;
+    
+    partner.messages.forEach(m => {
+        const div = document.createElement("div");
+        div.className = `msg ${m.sender}`;
+        div.textContent = m.text;
+        msgBox.appendChild(div);
+    });
+    msgBox.scrollTop = msgBox.scrollHeight;
+}
+
+function dispatchChatMessage() {
+    const input = document.getElementById("chatInputField");
+    const textStr = input.value.trim();
+    if (!textStr) return;
+    
+    const partner = matchedLog.find(p => p.id === conversationTargetId);
+    if (!partner) return;
+    
+    partner.messages.push({ sender: 'sent', text: textStr });
+    input.value = "";
+    refreshChatThread();
+    
+    // Answer selection logic supporting over 50 responses
+    let responseText;
+    const lowerInput = textStr.toLowerCase();
+    
+    if (lowerInput.includes("sahur") || lowerInput.includes("tung")) {
+        responseText = textBank.sahur[Math.floor(Math.random() * textBank.sahur.length)];
+    } else if (lowerInput.includes("granny") || lowerInput.includes("remake")) {
+        responseText = textBank.granny[Math.floor(Math.random() * textBank.granny.length)];
+    } else {
+        responseText = textBank.general[Math.floor(Math.random() * textBank.general.length)];
+    }
+    
+    setTimeout(() => {
+        partner.messages.push({ sender: 'received', text: responseText });
+        refreshChatThread();
+        renderSidebarList();
+    }, 1000);
+}
+
+function handleChatEnter(e) {
+    if (e.key === 'Enter') dispatchChatMessage();
+}
+
+function syncUserProfileText() {
+    const updatedValue = document.getElementById("profileInputName").value;
+    document.getElementById("navName").textContent = updatedValue || "Rudy";
+}
+
+// Initial core initialization setup runs
+renderDiscoveryCard();
+renderSidebarList();
+</script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+header {
+    background-color: orangered;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    font-size: 28px;
+}
+nav {
+    display: flex;
+    justify-content: center;
+    background-color: #333;
+    padding: 10px 0;
+}
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #20B2AA; /* Light Sea Green */
+    color: #333;
+}
+nav a {
+    color: white;
+    padding: 14px 20px;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: bold;
+}
+nav a:hover {
+    background-color: orangered;
+}
+.container {
+    max-width: 1000px;
+    margin: 20px auto;
+    background: white;
+    padding: 30px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+h1, h2 {
+    color: orangered;
+}
+ul {
+    list-style-type: square;
+    padding-left: 20px;
+}
+footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 15px 0;
+    margin-top: 30px;
+}
+img {
+    width: 500px;
+    height: 300px;
+    align-self: left;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+.container {
+    width: 90%;
+    max-width: 1000px;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+h5{
+    color: orangered;
+    font-size: 18px;
+}
+
+.BeingSunsmartVideo {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+.BeingSunsmartVideo {
+    width: 500px;
+    height: 300px;
+    align-self: left;
+}
+
+.visitor-counter {
+  text-align: center;      /* centers the widget */
+  margin-top: 10px;        /* space above */
+  overflow: hidden;        /* hides anything that spills out */
+}
+
+.visitor-counter table {
+  transform: scale(0.6);   /* shrink the counter */
+  transform-origin: top center; /* shrink from center */
+  margin: 0 auto;          /* keep centered */
+}
+
+.visitor-counter {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.visitor-counter img {
+  width: 120px;   /* adjust to whatever looks good */
+  height: auto;   /* keeps aspect ratio */
+  display: inline-block;
+}

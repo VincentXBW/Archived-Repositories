@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Lumberjack Idle — MrWood Mode (Animated)</title>
+<style>
+  :root{
+    --bg-a:#1b5e20; --bg-b:#1b5e20; --accent:#ffd166; --glass: rgba(255,255,255,0.04);
+    --card-radius:12px; --ui-gap:12px; --maxw:1100px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:linear-gradient(180deg,var(--bg-a),var(--bg-b));color:#fff;display:flex;justify-content:center;padding:18px}
+  .wrap{width:100%;max-width:var(--maxw)}
+  header{text-align:center;margin-bottom:12px}
+  h1{margin:6px 0;font-size:1.4rem}
+  .top{display:flex;gap:var(--ui-gap);align-items:flex-start}
+  .panel{background:var(--glass);padding:14px;border-radius:var(--card-radius);box-shadow:0 8px 30px rgba(0,0,0,0.45)}
+  .res{flex:1;min-width:220px}
+  .big{font-size:1.5rem;font-weight:700}
+  .small{font-size:0.85rem;color:rgba(255,255,255,0.85)}
+  button{background:linear-gradient(180deg,#06bd3d,#1c85ab);color:#fff;border:none;padding:8px 10px;border-radius:8px;cursor:pointer}
+  button[disabled]{opacity:.35;cursor:default}
+  #upgradesGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:12px}
+  .upgradeCard{display:flex;gap:10px;align-items:center;padding:10px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);position:relative}
+  .iconWrap{width:54px;height:54px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.12)}
+  .lvl{font-weight:700}
+  #inventory{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:10px}
+  .invItem{padding:8px;border-radius:8px;background:rgba(0,0,0,0.06);text-align:center}
+  .tier-badge{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(0,0,0,0.25);margin-left:8px}
+  .svgTree{width:96px;height:96px}
+  about{text-align:center;padding:12px;color:rgba(255,255,255,0.7);margin-top:12px}
+
+  /* Tree sway animation */
+  @keyframes sway { 0%{transform:translateX(0)}50%{transform:translateX(6px)}100%{transform:translateX(0)} }
+  .sway{animation: sway 2s ease-in-out infinite}
+
+  /* Upgrade affordable pulse */
+  @keyframes pulse {0%{box-shadow:0 0 0 rgba(255,255,255,0.0)}50%{box-shadow:0 0 18px rgba(255,215,102,0.12)}100%{box-shadow:0 0 0 rgba(255,255,255,0)}}
+  .affordable{animation:pulse 1.6s infinite}
+
+  /* Chop sparks */
+  .particle{position:absolute;width:8px;height:8px;background:rgba(255,235,59,0.95);border-radius:2px;pointer-events:none;transform-origin:center}
+
+  /* flash on tier up */
+  .tier-flash{position:fixed;inset:0;background:rgba(255,255,200,0.06);pointer-events:none;opacity:0;transition:opacity .35s}
+  .tier-flash.show{opacity:1}
+
+  /* number lerp */
+  .num{display:inline-block;min-width:36px;text-align:right}
+
+  /* tooltip */
+  .tooltip{position:relative}
+  .tooltip .tt{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(100% + 8px);background:rgba(0,0,0,0.8);padding:6px 8px;border-radius:6px;font-size:12px;white-space:nowrap;display:none}
+  .tooltip:hover .tt{display:block}
+
+  @media(max-width:880px){.top{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Lumberjack Idle — MrWood Mode (Animated)</h1>
+  <div class="about">
+    <h3>Made By VincentXBW</h3>
+    <p><a href="github.com/VincentXBW">Github</a></p>
+    <script type="text/javascript" src="https://counter.websiteout.com/js/7/4/0/0"></script>
+  </div>
+  <div class="small">All-in-one: animations, SVGs, inventory, auto-tiers, and save for GitHub Pages.</div>
+</header>
+<div class="top">
+  <div class="panel res">
+    <div style="display:flex;gap:12px;align-items:center;justify-content:space-between">
+      <div style="flex:1">
+        <h3>Wood <span id="tierBadge" class="tier-badge">Common</span></h3>
+        <div class="big"><span id="wood" class="num">0</span></div>
+        <div class="small">Per click: <span id="wpc">1</span> · Per sec: <span id="wps">0</span></div>
+        <div class="small" id="progressText">Tier: Common · Next at 1,000 Wood</div>
+      </div>
+      <div style="width:140px;text-align:center">
+        <svg id="treeSVG" class="svgTree sway" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <g id="treeCommon"><ellipse cx="32" cy="24" rx="16" ry="12" fill="#2e7d32" /><rect x="28" y="32" width="8" height="18" rx="1" fill="#8d5524" /></g>
+          <g id="treeUncommon" style="display:none"><ellipse cx="32" cy="22" rx="17" ry="13" fill="#3aa76a" /><rect x="27" y="33" width="10" height="18" rx="1" fill="#6b3b1a" /></g>
+          <g id="treeExotic" style="display:none"><path d="M32 8 C20 20, 18 28, 32 28 C46 28, 44 20, 32 8 Z" fill="#9b59b6" /><rect x="26" y="30" width="12" height="18" rx="2" fill="#6b3b1a" /></g>
+          <g id="treeMalev" style="display:none"><path d="M32 6 C18 22, 12 34, 32 34 C52 34, 46 22, 32 6 Z" fill="#d35400" /><rect x="27" y="34" width="10" height="20" rx="2" fill="#4b2b1a" /></g>
+          <g id="treeMyth" style="display:none"><circle cx="32" cy="20" r="14" fill="#f39c12" /><rect x="25" y="34" width="14" height="18" rx="2" fill="#4a2a10" /></g>
+          <g id="treeImp" style="display:none"><path d="M32 6 Q20 24, 32 30 Q44 24, 32 6 Z" fill="#e74c3c" /><rect x="28" y="34" width="8" height="20" rx="2" fill="#2f1a0f" /></g>
+        </svg>
+        <div style="margin-top:10px"><button id="chopBtn">Chop</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel res">
+    <h3>Iron <span class="small">(currency)</span></h3>
+    <div class="big"><span id="iron" class="num">0</span></div>
+    <div class="small">Per click: <span id="ipc">1</span> · Per sec: <span id="ips">0</span></div>
+    <div style="margin-top:8px"><button id="mineBtn">Mine</button></div>
+  </div>
+</div>
+
+<section style="margin-top:12px">
+  <div class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+      <div><strong>Upgrades Shop</strong></div>
+      <div class="small">Saved locally · S=save · R=reset</div>
+    </div>
+
+    <div id="upgradesGrid"></div>
+  </div>
+</section>
+
+<section style="margin-top:12px">
+  <div class="panel">
+    <strong>Inventory</strong>
+    <div id="inventory"></div>
+  </div>
+</section>
+
+</div>
+
+<div class="tier-flash" id="tierFlash"></div>
+
+<script>
+/* ===== Audio ===== */
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+function ensureAudio(){ if(!audioCtx) audioCtx = new AudioCtx(); }
+function playClick(){ try{ ensureAudio(); const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.type='sine'; o.frequency.value=780; g.gain.value=0.03; o.connect(g); g.connect(audioCtx.destination); o.start(); setTimeout(()=>o.stop(),80);}catch(e){} }
+function playBuy(){ try{ ensureAudio(); const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.type='triangle'; o.frequency.value=360; g.gain.value=0.06; o.connect(g); g.connect(audioCtx.destination); o.start(); setTimeout(()=>o.stop(),220);}catch(e){} }
+
+/* ===== Game state ===== */
+const TIERS = [
+  {id:0,name:'Common',threshold:0,mult:1},
+  {id:1,name:'Uncommon',threshold:1000,mult:1.4},
+  {id:2,name:'Exotic',threshold:10000,mult:2},
+  {id:3,name:'Malevolent',threshold:100000,mult:3.2},
+  {id:4,name:'Mythical',threshold:1000000,mult:5},
+  {id:5,name:'Impossible',threshold:10000000,mult:10}
+];
+let state = { wood:0, iron:0, wpcBase:1, ipcBase:1, wpc:1, ipc:1, wps:0, ips:0, tier:0, upgrades:{}, last:Date.now() };
+
+/* ===== Upgrades ===== */
+const UDEFS = [
+  {id:'chopper',label:'Chopper',type:'chopper',baseW:40,baseI:8,per:1},
+  {id:'chopperA',label:'Advanced Chopper',type:'chopper',baseW:350,baseI:60,per:6},
+  {id:'chopperX',label:'Industrial Chopper',type:'chopper',baseW:3200,baseI:420,per:40},
+  {id:'miner',label:'Miner',type:'miner',baseW:25,baseI:50,per:1},
+  {id:'minerA',label:'Autominer',type:'miner',baseW:220,baseI:520,per:8},
+  {id:'minerX',label:'Mine Factory',type:'miner',baseW:2100,baseI:4100,per:55},
+  {id:'worker',label:'Lumber Worker',type:'worker',baseW:90,baseI:22,per:1},
+  {id:'workerA',label:'Senior Worker',type:'worker',baseW:950,baseI:210,per:6},
+  {id:'treeFarm',label:'Tree Farm',type:'chopper',baseW:14000,baseI:5200,per:180},
+  {id:'forge',label:'Forge',type:'miner',baseW:8200,baseI:12600,per:180},
+  {id:'foreman',label:'Foreman',type:'mult',baseW:4800,baseI:980,mult:1.15},
+  {id:'engineer',label:'Engineer',type:'mult',baseW:22000,baseI:5200,mult:1.35},
+  {id:'lumberDepot',label:'Lumber Depot',type:'storage',baseW:9000,baseI:3000,per:250},
+  {id:'ironWarehouse',label:'Iron Warehouse',type:'storage',baseW:12000,baseI:9000,per:250},
+  {id:'magicAxe',label:'Magic Axe',type:'chopper',baseW:60000,baseI:30000,per:900},
+  {id:'dragonPick',label:'Dragon Pickaxe',type:'miner',baseW:70000,baseI:45000,per:900}
+];
+UDEFS.forEach(u=> state.upgrades[u.id] = state.upgrades[u.id]||0);
+
+/* ===== Helpers ===== */
+function fmt(n){ if(n>=1e9) return (n/1e9).toFixed(2)+'B'; if(n>=1e6) return (n/1e6).toFixed(2)+'M'; if(n>=1000) return (n/1000).toFixed(1)+'k'; return Math.floor(n); }
+function save(){ localStorage.setItem('lj_state_v3', JSON.stringify(state)); }
+function load(){ const s = localStorage.getItem('lj_state_v3'); if(s){ state = JSON.parse(s); applyState(); } }
+function reset(){ if(confirm('Reset game?')){ localStorage.removeItem('lj_state_v3'); location.reload(); }}
+
+/* ===== UI refs ===== */
+const woodEl=document.getElementById('wood'), ironEl=document.getElementById('iron');
+const wpcEl=document.getElementById('wpc'), ipcEl=document.getElementById('ipc');
+const wpsEl=document.getElementById('wps'), ipsEl=document.getElementById('ips');
+const grid=document.getElementById('upgradesGrid'), inv=document.getElementById('inventory');
+const tierBadge=document.getElementById('tierBadge'), progressText=document.getElementById('progressText');
+const treeSVG=document.getElementById('treeSVG'), tierFlash=document.getElementById('tierFlash');
+
+/* ===== Particles ===== */
+const particlePool=[];
+function spawnParticle(x,y,dx,dy,ttl=900){ const p=document.createElement('div'); p.className='particle'; p.style.left=x+'px'; p.style.top=y+'px'; document.body.appendChild(p); const start=performance.now(); function raf(t){ const dt=t-start; const px=x+dx*(dt/ttl); const py=y+dy*(dt/ttl) + 0.5*(dt/ttl)*(dt/ttl)*30; p.style.left=px+'px'; p.style.top=py+'px'; p.style.opacity=1-(dt/ttl); if(dt<ttl) requestAnimationFrame(raf); else p.remove(); } requestAnimationFrame(raf); }
+
+function chopParticles(el){ const r=el.getBoundingClientRect(); for(let i=0;i<10;i++){ const x=r.left + Math.random()*r.width; const y=r.top + Math.random()*r.height; const dx=(Math.random()-0.5)*120; const dy=-Math.random()*140; spawnParticle(x,y,dx,dy,800); } }
+
+/* ===== Core actions ===== */
+function clickChop(){ state.wood += state.wpc; chopParticles(document.getElementById('chopBtn')); playClick(); updateUI(); }
+function clickMine(){ state.iron += state.ipc; chopParticles(document.getElementById('mineBtn')); playClick(); updateUI(); }
+
+document.getElementById('chopBtn').addEventListener('click',clickChop);
+document.getElementById('mineBtn').addEventListener('click',clickMine);
+
+/* ===== Economics ===== */
+function costFor(u,lvl){ const mult=1.78; const w=Math.ceil(u.baseW*Math.pow(mult,lvl)); const i=Math.ceil(u.baseI*Math.pow(mult,lvl)); return {wood:w,iron:i}; }
+
+function buildGrid(){ grid.innerHTML=''; UDEFS.forEach(def=>{ const lvl=state.upgrades[def.id]||0; const cost=costFor(def,lvl); const card=document.createElement('div'); card.className='upgradeCard tooltip'; const affordable = state.wood>=cost.wood && state.iron>=cost.iron; if(affordable) card.classList.add('affordable'); card.innerHTML = `
+    <div class="iconWrap">${iconFor(def.id)}</div>
+    <div style="flex:1;text-align:left">
+      <div><strong>${def.label}</strong> <span class="small">Lv ${lvl}</span></div>
+      <div class="small">${descr(def)}</div>
+      <div style="margin-top:6px;font-size:0.9rem;color:rgba(255,255,255,0.85)">Cost: ${fmt(cost.wood)} W · ${fmt(cost.iron)} I</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+      <button ${!affordable? 'disabled' : ''} onclick="buyUpgrade('${def.id}')">Buy</button>
+      <div class="small">Owned: <span class="lvl">${lvl}</span></div>
+    </div>
+    <div class="tt">${tooltipText(def)}</div>
+  `; grid.appendChild(card); }); }
+
+function tooltipText(def){ if(def.type==='chopper') return `${def.label} provides +${def.per} wood/sec per level.`; if(def.type==='miner') return `${def.label} provides +${def.per} iron/sec per level.`; if(def.type==='worker') return `${def.label} increases wood per click by ${def.per} per level.`; if(def.type==='mult') return `${def.label} multiplies overall productivity.`; if(def.type==='storage') return `${def.label} increases storage efficiency.`; return ''; }
+
+function descr(def){ if(def.type==='chopper') return `+${def.per} W/sec per level`; if(def.type==='miner') return `+${def.per} I/sec per level`; if(def.type==='worker') return `+${def.per} WPC per level`; if(def.type==='mult') return `Global x${def.mult}`; if(def.type==='storage') return `Adds ${def.per} to passive`; return ''; }
+
+window.buyUpgrade = function(id){ const def=UDEFS.find(d=>d.id===id); const lvl=state.upgrades[id]||0; const cost=costFor(def,lvl); if(state.wood>=cost.wood && state.iron>=cost.iron){ state.wood-=cost.wood; state.iron-=cost.iron; state.upgrades[id]=lvl+1; applyEffect(def,lvl+1); playBuy(); flashPurchase(); buildGrid(); buildInv(); save(); updateUI(); }}
+
+function applyEffect(def,lvl){ const tierMult = TIERS[state.tier].mult; if(def.type==='chopper'){ state.wps += def.per * tierMult; } else if(def.type==='miner'){ state.ips += def.per * (tierMult/1.1); } else if(def.type==='worker'){ state.wpc += def.per; } else if(def.type==='mult'){ state.wpc *= def.mult; state.ipc *= def.mult; state.wps *= def.mult; state.ips *= def.mult; } else if(def.type==='storage'){ state.wps += def.per; state.ips += def.per; } }
+
+function buildInv(){ inv.innerHTML=''; UDEFS.forEach(def=>{ const lvl=state.upgrades[def.id]||0; const el=document.createElement('div'); el.className='invItem'; el.innerHTML = `${iconFor(def.id)}<div style="font-size:0.9rem;margin-top:6px"><strong>${def.label}</strong></div><div class="small">Lv ${lvl}</div>`; inv.appendChild(el); }); }
+
+/* ===== Tier logic & visuals ===== */
+function checkTier(){ for(let t=TIERS.length-1;t>=0;t--){ if(state.wood >= TIERS[t].threshold){ if(state.tier!==t){ state.tier=t; onTierUp(t); } break; } } }
+function onTierUp(t){ const tier=TIERS[t]; tierBadge.textContent=tier.name; animateTierFlash(); switchTreeGraphic(t); // apply a modest bonus
+  state.wpc += Math.ceil(1 * tier.mult); state.wps *= tier.mult; state.ips *= tier.mult; save(); }
+
+function switchTreeGraphic(t){ document.querySelectorAll('#treeSVG g').forEach(g=>g.style.display='none'); if(t===0) document.getElementById('treeCommon').style.display='block'; else if(t===1) document.getElementById('treeUncommon').style.display='block'; else if(t===2) document.getElementById('treeExotic').style.display='block'; else if(t===3) document.getElementById('treeMalev').style.display='block'; else if(t===4) document.getElementById('treeMyth').style.display='block'; else if(t===5) document.getElementById('treeImp').style.display='block'; }
+
+function animateTierFlash(){ tierFlash.classList.add('show'); setTimeout(()=>tierFlash.classList.remove('show'),400); // background tint change
+  document.body.style.background = `linear-gradient(180deg, rgba(40,70,30,0.95), rgba(20,30,20,0.95))`; setTimeout(()=>document.body.style.background = '',500); notify(`Tier Upgraded to ${TIERS[state.tier].name}!`) }
+
+function notify(msg){ const t=document.createElement('div'); t.textContent=msg; t.style.position='fixed'; t.style.left='50%'; t.style.transform='translateX(-50%)'; t.style.bottom='20px'; t.style.padding='10px 16px'; t.style.background='rgba(0,0,0,0.7)'; t.style.borderRadius='8px'; t.style.zIndex=9999; document.body.appendChild(t); setTimeout(()=>t.remove(),2200); }
+
+function flashPurchase(){ const f=document.createElement('div'); f.style.position='fixed'; f.style.right='18px'; f.style.top='18px'; f.style.width='10px'; f.style.height='10px'; f.style.background='gold'; f.style.borderRadius='50%'; f.style.boxShadow='0 0 10px gold'; document.body.appendChild(f); setTimeout(()=>f.remove(),220); }
+
+/* ===== Tick & UI update (with smooth number lerp) ===== */
+let displayed = {wood:0,iron:0};
+function tick(){ const now=Date.now(); const dt=(now-state.last)/1000; state.last=now; state.wood += state.wps * dt; state.iron += state.ips * dt; checkTier(); updateUI(); }
+
+function lerp(a,b,t){ return a + (b-a)*t; }
+function updateUI(){ // smooth numbers
+  displayed.wood = lerp(displayed.wood, state.wood, 0.18); displayed.iron = lerp(displayed.iron, state.iron, 0.18);
+  woodEl.textContent = fmt(displayed.wood); ironEl.textContent = fmt(displayed.iron);
+  document.getElementById('wpc').textContent = Math.max(1,Math.floor(state.wpc)); document.getElementById('ipc').textContent = Math.max(1,Math.floor(state.ipc));
+  document.getElementById('wps').textContent = Math.floor(state.wps); document.getElementById('ips').textContent = Math.floor(state.ips);
+  const next = TIERS.find(t=> t.threshold>state.wood);
+  progressText.textContent = next?`Tier: ${TIERS[state.tier].name} · Next at ${fmt(next.threshold)}`:`Tier: ${TIERS[state.tier].name} · Max tier`;
+  buildGrid(); buildInv(); // update afford indicators
+}
+
+/* ===== Save/load / apply state ===== */
+function applyState(){ state.wpc = state.wpcBase || 1; state.ipc = state.ipcBase || 1; state.wps = 0; state.ips = 0; state.last = Date.now(); UDEFS.forEach(def=>{ const lvl = state.upgrades[def.id]||0; for(let i=0;i<lvl;i++) applyEffect(def,i+1); }); checkTier(); updateUI(); }
+load(); if(!localStorage.getItem('lj_state_v3')){ state.wpc=1; state.ipc=1; state.wps=0; state.ips=0; buildGrid(); buildInv(); updateUI(); }
+setInterval(tick,1000);
+window.addEventListener('keydown',(e)=>{ if(e.key.toLowerCase()==='s'){ save(); notify('Saved'); } if(e.key.toLowerCase()==='r') reset(); });
+
+/* ===== Icons ===== */
+function iconFor(id){ const svg = (inner)=>`<svg width="36" height="36" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
+  if(id.includes('chopper')) return svg('<rect x="5" y="9" width="14" height="8" rx="2" fill="#4caf50"/><rect x="9" y="4" width="6" height="6" rx="1" fill="#8d5524"/>');
+  if(id.includes('miner')) return svg('<path d="M3 21h18v-2H3v2z" fill="#bdbdbd"/><path d="M8 6l4 4 4-4" fill="#c0c0c0"/>');
+  if(id.includes('worker')) return svg('<circle cx="12" cy="8" r="3" fill="#f1c40f"/><rect x="7" y="12" width="10" height="6" rx="1" fill="#ecf0f1"/>');
+  if(id.includes('tree')||id.includes('Farm')) return svg('<circle cx="12" cy="8" r="5" fill="#27ae60"/><rect x="10" y="12" width="4" height="6" rx="1" fill="#8d5524"/>');
+  if(id.includes('foreman')||id.includes('engineer')) return svg('<rect x="4" y="6" width="16" height="12" rx="2" fill="#3498db"/><path d="M8 10h8" stroke="#fff" stroke-width="1.2"/>');
+  return svg('<rect x="4" y="6" width="16" height="12" rx="2" fill="#95a5a6"/>'); }
+
+</script>
+</body>
+</html>

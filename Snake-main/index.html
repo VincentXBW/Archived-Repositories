@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snake Game</title>
+    <style>
+      body {
+        background-color: #06bd3d;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+      }
+
+      /* Desktop Layout: Side-by-Side */
+      .main-layout {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 30px;
+        max-width: 1400px;
+        margin: 2vw auto;
+      }
+
+      /* Side panel containing score and credits */
+      .side-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        text-align: left;
+        min-width: 180px;
+      }
+
+      #scoreContainer {
+        width: 100%;
+      }
+
+      .scoreBoard {
+        border-radius: 10px;
+        border: solid 5px #282828;
+        color: #a9a9a9;
+        background-color: #101010;
+        padding: 15px;
+        font-weight: bold;
+        font-size: 1.1rem;
+        box-shadow: 0px 0px 20px 3px rgba(0, 0, 0, 0.6);
+      }
+
+      .developerDetails {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        color: #0c1021;
+        font-family: monospace;
+        font-size: 0.95rem;
+      }
+
+      .developerDetails a {
+        color: #0c1021;
+        font-weight: bold;
+      }
+
+      /* Game Container - Updated to a 20x20 Grid layout */
+      #gameContainer {
+        display: grid;
+        grid-template-columns: repeat(20, 1fr); /* Updated from 40 to 20 */
+        grid-template-rows: repeat(20, 1fr);    /* Updated from 40 to 20 */
+        width: 40vw;
+        height: 40vw;
+        max-width: 750px;
+        max-height: 750px;
+        min-width: 320px;
+        min-height: 320px;
+        background-color: #101010;
+        border: solid 10px #282828;
+        border-radius: 10px;
+        box-shadow: 0px 0px 20px 3px rgba(0, 0, 0, 0.6);
+        overflow: hidden;
+      }
+
+      .gameBoardPixel {
+        background-color: transparent;
+      }
+
+      .snakeBodyPixel {
+        background-color: #06bd3d;
+        box-shadow: inset 0 0 4px blue, 0 0 4px blue;
+        border-radius: 50%;
+      }
+
+      .food {
+        background-color: red;
+        border-radius: 50%;
+        box-shadow: 0 0 8px red;
+      }
+
+      #onScreenControllers {
+        display: none;
+      }
+
+      /* Mobile Layout Stacked vertically */
+      @media only screen and (max-width: 768px) {
+        .main-layout {
+          flex-direction: column-reverse;
+          align-items: center;
+          gap: 20px;
+        }
+
+        .side-panel {
+          text-align: center;
+          align-items: center;
+          width: 80vw;
+        }
+
+        #gameContainer {
+          width: 85vw;
+          height: 85vw;
+        }
+
+        #onScreenControllers {
+          width: 80vw;
+          margin: 5vw auto;
+          display: flex;
+          justify-content: space-evenly;
+          align-items: center;
+        }
+
+        #onScreenControllers > div {
+          display: flex;
+          flex-direction: column;
+        }
+
+        #onScreenControllers button {
+          background-color: #282828;
+          color: white;
+          height: 15vw;
+          width: 15vw;
+          font-size: 6vw;
+          border: none;
+          border-radius: 10px;
+          margin: 5px;
+        }
+
+        #onScreenControllers button:active {
+          background-color: slategray;
+        }
+      }
+    </style>
+  </head>
+  <body>
+
+    <div class="main-layout">
+      
+      <div class="side-panel">
+        <div id="scoreContainer">
+          <div class="scoreBoard">Food: <span id="pointsEarned">0</span></div>
+          <div style="display:none;">Blocks: <span id="blocksTravelled">0</span></div>
+        </div>
+
+        <div class="developerDetails">
+          <div>
+            Forked By
+            <a href="https://github.com/VincentXBW/" target="_blank">Vincent</a>
+          </div>
+          <div>
+            View source code on
+            <a href="https://github.com/VincentXBW/Snake" target="_blank">GitHub</a>
+          </div>
+        </div>
+      </div>
+
+      <div id="gameContainer"></div>
+
+    </div>
+
+    <div id="onScreenControllers">
+      <button id="leftButton">&lt;</button>
+      <div>
+        <button id="upButton">^</button>
+        <button id="downButton">v</button>
+      </div>
+      <button id="rightButton">&gt;</button>
+    </div>
+
+    <script>
+      // GAME CONSTANTS - Changed tracking to a 20x20 setup
+      const GAME_PIXEL_COUNT = 20; // Changed from 40 to 20
+      const SQUARE_OF_GAME_PIXEL_COUNT = Math.pow(GAME_PIXEL_COUNT, 2); // 400 total grid squares
+      const GAME_SPEED = 130; // Managed slower speed 
+
+      let totalFoodAte = 0;
+      let totalDistanceTravelled = 0;
+
+      // INITIALIZE GAME BOARD
+      const gameContainer = document.getElementById("gameContainer");
+
+      const createGameBoardPixels = () => {
+        let gamePixelDivs = '';
+        for (let i = 1; i <= SQUARE_OF_GAME_PIXEL_COUNT; ++i) {
+          gamePixelDivs += `<div class="gameBoardPixel" id="pixel${i}"></div>`;
+        }
+        gameContainer.innerHTML = gamePixelDivs;
+      };
+
+      createGameBoardPixels();
+
+      // Reference array to handle pixel nodes
+      const gameBoardPixels = document.getElementsByClassName("gameBoardPixel");
+
+      // MULTI-FOOD LOGIC (3 Foods)
+      let currentFoodPositions = [-1, -1, -1]; 
+
+      const spawnFoodInstance = (index) => {
+        let newPosition;
+        do {
+          newPosition = Math.floor(Math.random() * SQUARE_OF_GAME_PIXEL_COUNT);
+        } while (currentFoodPositions.includes(newPosition));
+
+        currentFoodPositions[index] = newPosition;
+        gameBoardPixels[newPosition].classList.add("food");
+      };
+
+      const initAllFood = () => {
+        for (let i = 0; i < currentFoodPositions.length; i++) {
+          spawnFoodInstance(i);
+        }
+      };
+
+      // SNAKE DIRECTION CODES
+      const LEFT_DIR = 37;
+      const UP_DIR = 38;
+      const RIGHT_DIR = 39;
+      const DOWN_DIR = 40;
+
+      let snakeCurrentDirection = RIGHT_DIR;
+
+      const changeDirection = (newDirectionCode) => {
+        if (newDirectionCode == snakeCurrentDirection) return;
+
+        if (newDirectionCode == LEFT_DIR && snakeCurrentDirection != RIGHT_DIR) {
+          snakeCurrentDirection = newDirectionCode;
+        } else if (newDirectionCode == UP_DIR && snakeCurrentDirection != DOWN_DIR) {
+          snakeCurrentDirection = newDirectionCode;
+        } else if (newDirectionCode == RIGHT_DIR && snakeCurrentDirection != LEFT_DIR) {
+          snakeCurrentDirection = newDirectionCode;
+        } else if (newDirectionCode == DOWN_DIR && snakeCurrentDirection != UP_DIR) {
+          snakeCurrentDirection = newDirectionCode;
+        }
+      };
+
+      // Starting settings centered perfectly on the new 400-tile board
+      let currentSnakeHeadPosition = Math.floor(SQUARE_OF_GAME_PIXEL_COUNT / 2);
+      let snakeLength = GAME_SPEED * 3; // Starts snake body at 3 segments long
+
+      // MAIN LOOP FUNCTION
+      const moveSnake = () => {
+        switch (snakeCurrentDirection) {
+          case LEFT_DIR:
+            --currentSnakeHeadPosition;
+            if (currentSnakeHeadPosition % GAME_PIXEL_COUNT === GAME_PIXEL_COUNT - 1 || currentSnakeHeadPosition < 0) {
+              currentSnakeHeadPosition += GAME_PIXEL_COUNT;
+            }
+            break;
+          case UP_DIR:
+            currentSnakeHeadPosition -= GAME_PIXEL_COUNT;
+            if (currentSnakeHeadPosition < 0) {
+              currentSnakeHeadPosition += SQUARE_OF_GAME_PIXEL_COUNT;
+            }
+            break;
+          case RIGHT_DIR:
+            ++currentSnakeHeadPosition;
+            if (currentSnakeHeadPosition % GAME_PIXEL_COUNT === 0) {
+              currentSnakeHeadPosition -= GAME_PIXEL_COUNT;
+            }
+            break;
+          case DOWN_DIR:
+            currentSnakeHeadPosition += GAME_PIXEL_COUNT;
+            if (currentSnakeHeadPosition > SQUARE_OF_GAME_PIXEL_COUNT - 1) {
+              currentSnakeHeadPosition -= SQUARE_OF_GAME_PIXEL_COUNT;
+            }
+            break;
+        }
+
+        let nextSnakeHeadPixel = gameBoardPixels[currentSnakeHeadPosition];
+
+        // Self-collision handler
+        if (nextSnakeHeadPixel.classList.contains("snakeBodyPixel")) {
+          clearInterval(moveSnakeInterval);
+          alert(`Game Over! You ate ${totalFoodAte} pieces of food.`);
+          window.location.reload();
+          return;
+        }
+
+        // Advance tail step
+        nextSnakeHeadPixel.classList.add("snakeBodyPixel");
+
+        setTimeout(() => {
+          nextSnakeHeadPixel.classList.remove("snakeBodyPixel");
+        }, snakeLength);
+
+        // Update steps counter safely
+        totalDistanceTravelled++;
+        const blocksElement = document.getElementById("blocksTravelled");
+        if (blocksElement) blocksElement.innerHTML = totalDistanceTravelled;
+
+        // Food Collection Rule Check for all 3 food indices
+        if (currentFoodPositions.includes(currentSnakeHeadPosition)) {
+          const foodIndex = currentFoodPositions.indexOf(currentSnakeHeadPosition);
+          
+          totalFoodAte++;
+          document.getElementById("pointsEarned").innerHTML = totalFoodAte;
+
+          // Expand tail duration by 1 block segment (matching the game speed delay)
+          snakeLength += GAME_SPEED;
+
+          // Clear eaten food styling and respawn that specific food item
+          gameBoardPixels[currentSnakeHeadPosition].classList.remove("food");
+          spawnFoodInstance(foodIndex);
+        }
+      };
+
+      // RUN ENGINE
+      initAllFood();
+      var moveSnakeInterval = setInterval(moveSnake, GAME_SPEED);
+
+      // EVENT LISTENERS
+      window.addEventListener("keydown", (e) => changeDirection(e.keyCode));
+
+      // MOBILE TRIGGER HOOKS
+      document.getElementById("leftButton").onclick = () => changeDirection(LEFT_DIR);
+      document.getElementById("rightButton").onclick = () => changeDirection(RIGHT_DIR);
+      document.getElementById("upButton").onclick = () => changeDirection(UP_DIR);
+      document.getElementById("downButton").onclick = () => changeDirection(DOWN_DIR);
+    </script>
+  </body>
+</html>
